@@ -1,0 +1,86 @@
+[project]
+name = "exoplanet-ai"
+version = "0.1.0"
+description = "AI/ML pipeline for exoplanet classification (NASA Space Apps 2025)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [ {name = "Sharknados"} ]
+keywords = ["astronomy", "exoplanet", "machine-learning", "space-apps", "nasa"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Astronomy",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "pydantic>=2.8",
+  "pandas>=2.2",
+  "numpy>=1.26",
+  "scikit-learn>=1.5",
+  "pyarrow>=17.0",
+  "requests>=2.32",
+  "fastapi>=0.115",
+  "uvicorn>=0.30",
+  "typer>=0.12",
+  "rich>=13.7",
+  "joblib>=1.4",
+  "ruyaml>=0.91",
+  "plotly>=5.23",
+  "scipy>=1.11",
+  "xgboost>=2.1",
+  "lightgbm>=4.5",
+  "imbalanced-learn>=0.12",
+  "streamlit>=1.38",
+  "gradio>=4.44",
+  "lightkurve>=2.4",
+  "onnx>=1.16",
+  "skl2onnx>=1.16",
+  "onnxmltools>=1.11",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "pytest-cov>=5.0",
+  "ruff>=0.6",
+  "mypy>=1.11",
+  "types-requests",
+  "ipykernel",
+]
+
+[project.scripts]
+exo-fetch = "exoplanet_ai.cli:fetch_data"
+exo-train = "exoplanet_ai.cli:train"
+exo-eval = "exoplanet_ai.cli:evaluate"
+exo-api = "exoplanet_ai.cli:run_api"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["exoplanet_ai*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+exclude = ["data", "models", "artifacts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "A", "C4", "DTZ", "T20", "SIM", "PL"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+addopts = "-ra --cov=exoplanet_ai --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.10"
+packages = ["exoplanet_ai"]
+ignore_missing_imports = true
+strict = false

@@ -1,0 +1,2 @@
+# Convenience requirements file mirroring pyproject optional deps
+-e .[dev]
