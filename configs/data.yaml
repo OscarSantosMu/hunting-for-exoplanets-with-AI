@@ -1,0 +1,21 @@
+defaults:
+  target_column: label
+  mission: kepler
+paths:
+  raw: data/raw
+  external: data/external
+  interim: data/interim
+  processed: data/processed
+missions:
+  kepler:
+    source: pscomppars
+    id_column: kepid
+    label_column: koi_disposition
+  k2:
+    source: k2candidates
+    id_column: epic_id
+    label_column: disp
+  tess:
+    source: toi
+    id_column: toi
+    label_column: disposition
