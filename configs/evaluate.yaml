@@ -1,0 +1,13 @@
+metrics:
+  - accuracy
+  - precision
+  - recall
+  - f1
+  - roc_auc
+  - pr_auc
+thresholds:
+  recall_at_fpr:
+    fpr: 0.01
+report:
+  confusion_matrix: true
+  shap_summary: true

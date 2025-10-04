@@ -1,0 +1,8 @@
+api:
+  enable_batch_endpoint: false
+  enable_explainability: true
+ui:
+  allow_file_upload: true
+  enable_auth: false
+feature_flags:
+  show_metrics_dashboard: true
