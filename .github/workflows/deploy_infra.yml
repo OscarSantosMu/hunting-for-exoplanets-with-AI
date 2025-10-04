@@ -12,14 +12,14 @@ on:
     paths:
       - "infra/terraform/**"
 
-#Special permissions required for OIDC authentication
 permissions:
   id-token: write
   contents: read
   pull-requests: write
 
-#These environment variables are used by the terraform azure provider to setup OIDD authenticate. 
 env:
+  # AzureRM provider (OIDC / Workload Identity Federation)
+  ARM_USE_OIDC: "true"
   ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
   ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
   ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
@@ -31,49 +31,48 @@ jobs:
       id-token: write
       contents: read
 
+    defaults:
+      run:
+        working-directory: infra/terraform
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-        # Install the latest version of the Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-            terraform_wrapper: false
+          terraform_wrapper: false
 
       - name: Terraform Init
         run: terraform init
 
-        # Generates an execution plan for Terraform
-        # An exit code of 0 indicated no changes, 1 a terraform failure, 2 there are pending changes.
       - name: Terraform Plan
         id: tf-plan
         run: |
-            export exitcode=0
-            terraform plan -detailed-exitcode -no-color -out tfplan || export exitcode=$?
-
-            echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
-            
-            if [ $exitcode -eq 1 ]; then
-            echo Terraform Plan Failed!
+          export exitcode=0
+          terraform plan -detailed-exitcode -no-color -out tfplan || export exitcode=$?
+          echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+          if [ $exitcode -eq 1 ]; then
+            echo "Terraform Plan Failed!"
             exit 1
-            else 
+          else
             exit 0
-            fi
+          fi
 
-        # Save plan to artifacts  
       - name: Publish Terraform Plan
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-            name: tfplan
-            path: tfplan
-    
-        # Download saved plan from artifacts  
-      - name: Download Terraform Plan
-        uses: actions/download-artifact@v3
-        with:
-            name: tfplan
+          name: tfplan
+          path: infra/terraform/tfplan
+          if-no-files-found: error
+          retention-days: 7
 
-        # Terraform Apply
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: infra/terraform
+
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
