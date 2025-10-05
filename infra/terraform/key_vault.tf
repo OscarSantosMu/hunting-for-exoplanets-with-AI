@@ -1,7 +1,7 @@
-resource "azurerm_key_vault" "exo" {
+resource "azurerm_key_vault" "cosmo" {
   name                       = "cosmonet-ai-kv"
-  resource_group_name        = azurerm_resource_group.exo.name
-  location                   = azurerm_resource_group.exo.location
+  resource_group_name        = azurerm_resource_group.cosmo.name
+  location                   = azurerm_resource_group.cosmo.location
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
 

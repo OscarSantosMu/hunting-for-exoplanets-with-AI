@@ -1,7 +1,7 @@
 variable "project_name" {
   type        = string
   description = "Base name prefix for Azure resources"
-  default     = "exoplanet-ai"
+  default     = "cosmo-ai"
 }
 
 variable "location" {
@@ -13,37 +13,37 @@ variable "location" {
 variable "resource_group_name" {
   type        = string
   description = "Name of the resource group"
-  default     = "rg-exoplanet-ai"
+  default     = "cosmo-ai-rg"
 }
 
 variable "acr_name" {
   type        = string
   description = "Azure Container Registry name"
-  default     = "exoplanetacr"
+  default     = "cosmoacr"
 }
 
 variable "storage_account_name" {
   type        = string
   description = "Globally unique storage account name (lowercase, 3-24 characters)"
-  default     = "exoplanetaisastrg"
+  default     = "cosmoaisastrg"
 }
 
 variable "key_vault_name" {
   type        = string
   description = "Azure Key Vault name (3-24 characters, letters/digits/hyphen)"
-  default     = "exoplanet-ai-kv"
+  default     = "cosmo-ai-kv"
 }
 
 variable "ml_workspace_name" {
   type        = string
   description = "Azure Machine Learning workspace name"
-  default     = "exoplanet-ai-mlw"
+  default     = "cosmo-ai-mlw"
 }
 
 variable "static_web_app_name" {
   type        = string
   description = "Azure Static Web App name"
-  default     = "exoplanet-ai-swa"
+  default     = "cosmo-ai-swa"
 }
 
 variable "static_web_app_sku_tier" {
@@ -61,7 +61,7 @@ variable "static_web_app_sku_size" {
 variable "api_service_plan_name" {
   type        = string
   description = "App Service plan name for the FastAPI deployment"
-  default     = "exoplanet-ai-api-plan"
+  default     = "cosmo-ai-api-plan"
 }
 
 variable "api_service_plan_sku_name" {
@@ -73,7 +73,7 @@ variable "api_service_plan_sku_name" {
 variable "api_web_app_name" {
   type        = string
   description = "Azure Web App name hosting the FastAPI service"
-  default     = "exoplanet-ai-api"
+  default     = "cosmo-ai-api"
 }
 
 variable "api_container_repository" {
