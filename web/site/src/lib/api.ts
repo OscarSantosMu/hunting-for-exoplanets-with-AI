@@ -1,6 +1,17 @@
 // src/lib/api.ts
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const fromEnv = import.meta.env.VITE_API_BASE_URL;
+
+const API_BASE_URL =
+  import.meta.env.PROD
+    ? (fromEnv ?? (() => { throw new Error('VITE_API_BASE_URL missing in prod build'); })())
+    : (fromEnv ?? 'http://localhost:8000');
+const API_BASE_URL2 = import.meta.env.PROD
+  ? fromEnv ??
+    (() => {
+      throw new Error("VITE_API_BASE_URL2 missing in prod build");
+    })()
+  : fromEnv ?? "http://localhost:8001";
 
 // Data Models from FastAPI
 export interface TrainRequest {
@@ -40,7 +51,6 @@ export interface BatchPredictResponse {
     results: Record<string, any>[];
 }
 
-
 /**
  * Fetches the health status of the API.
  * @returns A promise that resolves to the health status.
@@ -49,6 +59,14 @@ export async function getHealth(): Promise<HealthResponse> {
   const response = await fetch(`${API_BASE_URL}/`);
   if (!response.ok) {
     throw new Error('Failed to fetch API health.');
+  }
+  return response.json();
+}
+
+export async function getHealth2(): Promise<HealthResponse> {
+  const response = await fetch(`${API_BASE_URL2}/`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch API health.");
   }
   return response.json();
 }
@@ -104,7 +122,7 @@ export async function uploadFile(file: File): Promise<{ blob_path: string }> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch(`${API_BASE_URL}/upload-to-blob/`, {
+  const response = await fetch(`${API_BASE_URL2}/upload-to-blob/`, {
     method: 'POST',
     body: formData,
   });

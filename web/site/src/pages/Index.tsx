@@ -2,7 +2,7 @@ import HeroSection from "@/components/HeroSection";
 import DataVisualization from "@/components/DataVisualization";
 import { sampleExoplanets } from "@/data/sampleExoplanets";
 import { useView } from "@/contexts/ViewContext";
-import { getHealth, HealthResponse, predictRealtime, PredictResponse, PredictRequest } from "@/lib/api";
+import { getHealth, getHealth2, HealthResponse, predictRealtime, PredictResponse, PredictRequest } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,17 @@ const Index = () => {
   const checkApiHealth = async () => {
     try {
       const healthStatus = await getHealth();
+      setHealth(healthStatus);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unknown error occurred.");
+      setHealth(null);
+    }
+  };
+
+  const checkApiHealth2 = async () => {
+    try {
+      const healthStatus = await getHealth2();
       setHealth(healthStatus);
       setError(null);
     } catch (err) {
@@ -63,6 +74,17 @@ const Index = () => {
           </CardHeader>
           <CardContent className="flex items-center space-x-4">
             <Button onClick={checkApiHealth}>Refresh Status</Button>
+            {error && <p className="text-red-500">Error: {error}</p>}
+            {health && <p className="text-green-500 font-semibold">Health: {health.Health}</p>}
+          </CardContent>
+        </Card>
+
+        <Card className="card-cosmic">
+          <CardHeader>
+            <CardTitle className="glow-text">API2 Status</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center space-x-4">
+            <Button onClick={checkApiHealth2}>Refresh Status</Button>
             {error && <p className="text-red-500">Error: {error}</p>}
             {health && <p className="text-green-500 font-semibold">Health: {health.Health}</p>}
           </CardContent>
