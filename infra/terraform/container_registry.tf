@@ -3,6 +3,6 @@ resource "azurerm_container_registry" "exo" {
   resource_group_name = azurerm_resource_group.exo.name
   location            = azurerm_resource_group.exo.location
   sku                 = "Basic"
-  admin_enabled       = true
+  admin_enabled       = false
   tags                = var.tags
 }

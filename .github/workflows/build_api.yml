@@ -1,0 +1,68 @@
+# actionlint: disable=expr
+name: Build and Push API Image
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "infra/docker/Dockerfile.api"
+      - "web/api/**"
+      - "src/exoplanet_ai/api/**"
+
+env:
+  ACR_NAME: exoplanetacr                  # Registry name (not FQDN)
+  ACR_LOGIN_SERVER: exoplanetacr.azurecr.io
+  IMAGE_REPOSITORY: fastapi
+  IMAGE_TAG: latest
+  DOCKERFILE_PATH: infra/docker/Dockerfile.api
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: acr-build-api-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push FastAPI image with ACR Tasks
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            set -euo pipefail
+
+            if [ -z "${ACR_NAME:-}" ]; then
+              echo "ACR_NAME environment variable must be set (Azure Container Registry name)." >&2
+              exit 1
+            fi
+
+            IMAGE_REPO="${IMAGE_REPOSITORY:-fastapi}"
+            LATEST_TAG="${IMAGE_TAG:-latest}"
+            DOCKERFILE="${DOCKERFILE_PATH:-infra/docker/Dockerfile.api}"
+            SHORT_SHA="${GITHUB_SHA::7}"
+
+            echo "Building ${IMAGE_REPO}:{${LATEST_TAG},${SHORT_SHA}} in ${ACR_NAME} using ${DOCKERFILE}"
+
+            # You can add --platform linux/amd64 if needed by your runtime
+            az acr build \
+              --registry "$ACR_NAME" \
+              --file "$DOCKERFILE" \
+              --image "${IMAGE_REPO}:${LATEST_TAG}" \
+              --image "${IMAGE_REPO}:${SHORT_SHA}" \
+              . 
+
+            echo "### Image pushed" >> "$GITHUB_STEP_SUMMARY"
+            echo "- ${ACR_LOGIN_SERVER}/${IMAGE_REPO}:${LATEST_TAG}" >> "$GITHUB_STEP_SUMMARY"
+            echo "- ${ACR_LOGIN_SERVER}/${IMAGE_REPO}:${SHORT_SHA}" >> "$GITHUB_STEP_SUMMARY"

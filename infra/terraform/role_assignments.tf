@@ -21,3 +21,9 @@ resource "azurerm_role_assignment" "guest_storage_reader" {
   role_definition_name = "Storage Blob Data Reader"
   principal_id         = data.azuread_user.guest_user.object_id
 }
+
+resource "azurerm_role_assignment" "api_identity_acr_pull" {
+  scope                = azurerm_container_registry.exo.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_linux_web_app.api.identity[0].principal_id
+}

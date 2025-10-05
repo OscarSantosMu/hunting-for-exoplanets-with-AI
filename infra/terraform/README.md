@@ -8,6 +8,7 @@ This module provisions the base Azure resources required for Azure Machine Learn
 - Application Insights for monitoring
 - Azure Machine Learning Workspace (system-assigned identity)
 - Azure Container Registry (for model & service images)
+- App Service Plan + Linux Web App hosting the FastAPI API (containerized)
 - Azure Static Web App (for the React/Vite frontend)
 
 ## Usage
@@ -19,6 +20,8 @@ terraform apply
 ```
 
 > **Note:** Storage account and key vault names must be globally unique. Override `storage_account_name` / `key_vault_name` if the defaults are already taken.
+
+The FastAPI deployment pulls the container image from the project ACR. Override `api_container_repository`, `api_container_image_tag`, or inject additional application settings through `api_app_settings` if you deploy a differently tagged image or need environment variables.
 
 After the workspace is provisioned you can register models, create environments, and manage online endpoints with the Azure ML CLI or SDK.
 
