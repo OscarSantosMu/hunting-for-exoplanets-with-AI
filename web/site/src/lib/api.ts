@@ -1,6 +1,11 @@
 // src/lib/api.ts
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const fromEnv = import.meta.env.VITE_API_BASE_URL;
+
+const API_BASE_URL =
+  import.meta.env.PROD
+    ? (fromEnv ?? (() => { throw new Error('VITE_API_BASE_URL missing in prod build'); })())
+    : (fromEnv ?? 'http://localhost:8000');
 
 // Data Models from FastAPI
 export interface TrainRequest {
