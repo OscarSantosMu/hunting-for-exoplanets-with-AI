@@ -99,3 +99,15 @@ variable "tags" {
   description = "Optional tags applied to all resources"
   default     = {}
 }
+
+variable "container_app_environment_name" {
+  type        = string
+  description = "Name of the Container App Environment"
+  default     = "exop-ai-cae"
+}
+
+variable "log_analytics_workspace_name" {
+  type        = string
+  description = "Name of the Log Analytics Workspace"
+  default     = "exop-ai-law"
+}
