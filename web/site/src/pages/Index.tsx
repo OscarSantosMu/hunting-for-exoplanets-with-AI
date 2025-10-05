@@ -184,9 +184,19 @@ const Index = () => {
               {/* Video adicional */}
               <div className="max-w-4xl mx-auto animate-fade-in">
                 <div className="card-cosmic p-6 space-y-4">
-                  <h3 className="text-2xl font-bold text-center">
-                    🚀 El Telescopio James Webb
-                  </h3>
+                  <div>
+                    <h4 className="text-2xl font-bold text-center glow-text mb-2">🪐¡Así se descubre un nuevo planeta!</h4>
+                    <h5 className="text-center text-sm text-muted-foreground mb-4">Método del Tránsito: El paso de un planeta frente a una estrella</h5>
+                  </div>
+                    <div className="w-full flex justify-center items-center py-4">
+                    <img
+                      src="/images/Exoplanet_transit_method.gif"
+                      alt="Método del tránsito de exoplanetas"
+                      className="rounded-lg shadow-lg max-h-120"
+                    />
+                    </div>
+                  <h3 className="text-2xl font-bold text-center py-2">🚀 El Telescopio James Webb</h3>
+                  <h4 className="text-center text-sm text-muted-foreground mb-4">¡Nuestros ojo en el espacio!</h4>
                   <div className="aspect-video bg-accent/10 rounded-lg flex items-center justify-center border border-primary/20">
                     <iframe
                       className="w-full h-full rounded-lg"
@@ -210,7 +220,11 @@ const Index = () => {
           </section>
         </>
       ) : (
-        <DataVisualization data={sampleExoplanets} />
+        <section className="py-16 px-4 bg-gradient-to-b from-background to-accent/5">
+            <div className="container mx-auto max-w-6xl space-y-16">
+              <DataVisualization data={sampleExoplanets} />
+            </div>
+          </section>
       )}
 
       {viewMode !== "kids" ? (

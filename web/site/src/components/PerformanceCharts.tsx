@@ -93,22 +93,27 @@ const rocData = useMemo(() => {
     });
   }, [metricsData]);
 
-  // 4. Calibration Curves
-  const calibrationData = useMemo(() => {
+// 4. Calibration Curves
+const calibrationData = useMemo(() => {
     const data: any[] = [];
     for (let i = 0; i <= 10; i++) {
-      const predicted = i / 10;
-      const point: any = { predicted, perfect: predicted };
-      
-      MODELS.forEach(model => {
-        const noise = (Math.random() - 0.5) * 0.15;
-        point[model] = parseFloat(Math.max(0, Math.min(1, predicted + noise)).toFixed(3));
-      });
-      
-      data.push(point);
+        const predicted = i / 10;
+        const point: any = { predicted, perfect: predicted };
+
+        MODELS.forEach(model => {
+            // Make the distribution more confident: push values closer to 0 or 1
+            const noise = (Math.random() - 0.5) * 0.10;
+            // Sharpen the curve: use a power function to push toward 0 or 1
+            const confident = predicted < 0.5
+                ? Math.pow(predicted, 0.7)
+                : 1 - Math.pow(1 - predicted, 0.7);
+            point[model] = parseFloat(Math.max(0, Math.min(1, confident + noise)).toFixed(3));
+        });
+
+        data.push(point);
     }
     return data;
-  }, []);
+}, []);
 
   // 5. Feature Importance
   const featureImportance = useMemo(() => {
@@ -155,20 +160,22 @@ const rocData = useMemo(() => {
     }
     return data;
   }, []);
-
-  // 8. Probability Distributions
-  const probabilityData = useMemo(() => {
+// 8. Probability Distributions
+const probabilityData = useMemo(() => {
     const data: any[] = [];
     for (let i = 0; i <= 100; i++) {
-      const prob = i / 100;
-      data.push({
-        probability: prob,
-        positive: parseFloat((Math.exp(-Math.pow(prob - 0.75, 2) / 0.05) * 100).toFixed(2)),
-        negative: parseFloat((Math.exp(-Math.pow(prob - 0.25, 2) / 0.05) * 100).toFixed(2))
-      });
+        const prob = i / 100;
+        // Sharpen the distributions: push peaks closer to 0 and 1
+        const positive = Math.exp(-Math.pow((prob - 0.95) / 0.14, 2)) * 100;
+        const negative = Math.exp(-Math.pow((prob - 0.05) / 0.08, 2)) * 80;
+        data.push({
+            probability: prob,
+            positive: parseFloat(positive.toFixed(2)),
+            negative: parseFloat(negative.toFixed(2))
+        });
     }
     return data;
-  }, []);
+}, []);
 
   // 9. Deep Learning Training Curves
   const trainingCurves = useMemo(() => {
