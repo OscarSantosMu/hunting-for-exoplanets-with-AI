@@ -7,6 +7,8 @@ This module provisions the base Azure resources required for Azure Machine Learn
 - Azure Key Vault for secrets
 - Application Insights for monitoring
 - Azure Machine Learning Workspace (system-assigned identity)
+- Azure Container Registry (for model & service images)
+- Azure Static Web App (for the React/Vite frontend)
 
 ## Usage
 ```bash
@@ -19,6 +21,14 @@ terraform apply
 > **Note:** Storage account and key vault names must be globally unique. Override `storage_account_name` / `key_vault_name` if the defaults are already taken.
 
 After the workspace is provisioned you can register models, create environments, and manage online endpoints with the Azure ML CLI or SDK.
+
+The Static Web App deployment token is exposed as a Terraform output so you can wire it into GitHub Actions:
+
+```bash
+terraform output -raw static_web_app_api_key
+```
+
+Store this value as the `AZURE_STATIC_WEB_APPS_API_TOKEN` repository secret so `.github/workflows/swa.yml` can publish the Vite build on every commit. The accompanying `static_web_app_host` output surfaces the default hostname, which is useful when configuring DNS or documenting the deployed site.
 
 ## Remote State Backend
 

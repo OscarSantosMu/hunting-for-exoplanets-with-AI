@@ -23,8 +23,19 @@ The module creates:
 - Key Vault (wired to the workspace and AML-managed identities)
 - Application Insights
 - Azure Machine Learning workspace (system-assigned identity)
+- Azure Static Web App (hosts the React frontend)
 
-Take note of the outputs (workspace name, Key Vault URI, ACR credentials). Override `storage_account_name` / `key_vault_name` if the defaults collide with existing resources.
+Take note of the outputs (workspace name, Key Vault URI, ACR credentials, Static Web App hostname/token). Override `storage_account_name` / `key_vault_name` if the defaults collide with existing resources.
+
+### Surfacing the Static Web App Deployment Token
+
+After `terraform apply`, retrieve the deployment token and store it in the repository secret `AZURE_STATIC_WEB_APPS_API_TOKEN` so the GitHub Action can publish the SPA:
+
+```pwsh
+terraform output -raw static_web_app_api_key
+```
+
+The default hostname is available via `terraform output static_web_app_host` for documentation and DNS wiring.
 
 ## 2. Build & Push the Inference Image
 
@@ -136,6 +147,7 @@ Use blue/green deployments for safe rollouts (`az ml online-deployment update` +
 ## CI/CD Considerations
 
 - **Terraform**: Existing workflows (`ci.yml`, `deploy_infra.yml`) continue to run `terraform plan` / `apply`, now provisioning AML resources.
+- **Static Web App Deployments**: `.github/workflows/swa.yml` builds the Vite SPA (`npm run build`) and uploads `dist/` to the SWA instance on every push/PR touching `web/site/**`. It requires the deployment token listed above.
 - **Azure ML CLI**: Extend pipelines after the build/test stage:
   ```pwsh
   az extension add -n ml

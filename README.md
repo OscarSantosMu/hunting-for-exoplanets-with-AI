@@ -12,7 +12,7 @@ Thousands of exoplanets have been discovered via space-based survey missions. Mu
 * Ingest (sample) public NASA Exoplanet Archive data
 * Train baseline ML models (Random Forest, optional LightGBM / XGBoost)
 * Serve predictions via a FastAPI service
-* Offer an interactive Streamlit UI for manual feature input & experimentation
+* Offer a modern React SPA (Vite + Tailwind + shadcn-ui) for exploration, with legacy Streamlit/Gradio prototypes for rapid experimentation
 * Prepare space for advanced preprocessing, feature engineering, model selection & evaluation
 
 ## High-Level Architecture
@@ -34,11 +34,11 @@ src/exoplanet_ai/
 	training/             # orchestration & callbacks
 	inference/            # batch predict + schemas
 	evaluation/           # metrics, reporting, thresholds
-	ui/                   # Streamlit app
+	ui/                   # Streamlit app (legacy prototype)
 	viz/                  # Plotly charts
 	utils/                # logging, path helpers
 tests/                  # pytest suites (data, features, api, cli)
-web/                    # deployment entrypoints (API mount, Streamlit/Gradio)
+web/                    # FastAPI mount, React SPA (web/site), legacy demos
 ```
 
 ## Quick Start
@@ -71,7 +71,16 @@ python scripts/run_api.py
 ```
 Visit: http://localhost:8000/docs for interactive Swagger UI.
 
-### 5. Streamlit UI
+### 5. React Web App
+```pwsh
+cd web/site
+npm install
+cp .env.example .env.local  # ensure VITE_API_BASE_URL is set
+npm run dev
+```
+The dev server runs at <http://localhost:5173>. Point `VITE_API_BASE_URL` to the FastAPI service (default `http://localhost:8000`).
+
+### Optional: Streamlit UI
 ```pwsh
 streamlit run src/exoplanet_ai/ui/app.py
 ```
@@ -91,14 +100,14 @@ python -c "from exoplanet_ai.data.lightcurve import download_lightcurve; downloa
 make onnx
 ```
 
-### Deploy: Terraform + Azure Machine Learning
+### Deploy: Terraform + Azure Machine Learning + Static Web App
 ```pwsh
 cd infra/terraform
 terraform init
 terraform plan -var="project_name=exo-ai" -var="acr_name=exoacr" -var="storage_account_name=<unique storage>"
 terraform apply
 ```
-Use the outputs (workspace name, Key Vault URI, ACR credentials) together with the Azure ML CLI to register models and manage endpoints:
+Use the outputs (workspace name, Key Vault URI, ACR credentials, Static Web App hostname/token) together with the Azure ML CLI to register models and manage endpoints, and set the `AZURE_STATIC_WEB_APPS_API_TOKEN` repository secret so the SPA deploy workflow can publish automatically:
 ```pwsh
 # train a model first, then
 az login
@@ -109,7 +118,7 @@ az ml online-endpoint create --file infra/aml/endpoint.yaml
 az ml online-deployment create --file infra/aml/deployment.yaml --all-traffic
 ```
 Remote state lives in the Azure Storage account (`tfstate` container). If this is your first run, create the container once with `az storage container create --name tfstate --account-name <your-storage-account> --auth-mode login` before re-running `terraform init -backend-config=backend.hcl -reconfigure`.
-See `docs/azure.md` for end-to-end AML guidance and YAML templates.
+See `docs/azure.md` for end-to-end AML guidance, Static Web App provisioning, and YAML templates.
 
 ### Optional: Container Apps Fallback
 If you prefer a lightweight container deployment, adapt the previous Container Apps instructions (now archived in repo history) or create a new Terraform stack dedicated to ACA.
@@ -143,14 +152,15 @@ You can extend these to add richer preprocessing, balancing strategies, feature 
 
 ## Tech Stack Snapshot
 - **Backend**: FastAPI, ONNX Runtime-ready exports, scikit-learn baselines, optional LightGBM/XGBoost.
-- **Frontend**: Streamlit, Gradio, Plotly visualizations.
+- **Frontend**: React + Vite + Tailwind + shadcn-ui SPA (primary), Streamlit & Gradio (legacy prototypes), Plotly visualizations.
 - **Data**: Lightkurve integration for light curves, pandas/pyarrow for tabular data.
 - **Ops**: Docker, Terraform (Azure Machine Learning workspace), GitHub Actions, optional K8s manifests.
 - **MLOps**: Azure Machine Learning model registry, environments, and online endpoints (Container Apps available as a fallback).
 
 ## CI/CD
 - `ci.yml` runs lint/tests, builds Docker images, exports ONNX artifacts, and generates Terraform plans on pushes & PRs.
-- Terraform apply (via `deploy_infra.yml`) provisions the AML workspace, storage, Key Vault, and supporting resources when triggered manually.
+- Terraform apply (via `deploy_infra.yml`) provisions the AML workspace, storage, Key Vault, Static Web App, and supporting resources when triggered manually.
+- `swa.yml` builds the React SPA and publishes it to Azure Static Web Apps on every push/PR touching `web/site/**` (requires `AZURE_STATIC_WEB_APPS_API_TOKEN`).
 - Configure Azure OIDC credentials in repository secrets (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`).
 - Extend the workflows with Azure ML CLI steps (`az ml model create`, `az ml online-deployment update`) to automate model promotion—templates live in `docs/azure.md`.
 
