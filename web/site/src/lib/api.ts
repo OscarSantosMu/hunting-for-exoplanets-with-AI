@@ -136,8 +136,15 @@ export async function uploadFile(
     method: "POST",
     body: formData,
   });
-  if (!res.ok)
-    throw new Error((await res.json()).detail || "Failed to upload file.");
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      throw new Error(errorData.detail || "Failed to upload file.");
+    } catch (jsonError) {
+      const textError = await res.text();
+      throw new Error(textError || "Failed to upload file due to a server error.");
+    }
+  }
   return res.json();
 }
 
