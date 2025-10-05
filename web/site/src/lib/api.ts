@@ -96,6 +96,27 @@ export async function predictRealtime(request: PredictRequest): Promise<PredictR
 }
 
 /**
+ * Uploads a file to blob storage.
+ * @param file The file to upload.
+ * @returns A promise that resolves to the path of the uploaded blob.
+ */
+export async function uploadFile(file: File): Promise<{ blob_path: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_BASE_URL}/upload-to-blob/`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Failed to upload file.');
+  }
+  return response.json();
+}
+
+/**
  * Sends a request for batch prediction.
  * @param request The batch prediction request payload.
  * @returns A promise that resolves to the batch prediction response.
