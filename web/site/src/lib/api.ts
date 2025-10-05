@@ -45,7 +45,6 @@ export interface BatchPredictResponse {
     results: Record<string, any>[];
 }
 
-
 /**
  * Fetches the health status of the API.
  * @returns A promise that resolves to the health status.

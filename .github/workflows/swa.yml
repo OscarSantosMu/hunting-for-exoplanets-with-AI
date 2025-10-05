@@ -41,4 +41,4 @@ jobs:
           app_location: "web/site"     # path to app source
           output_location: "dist"      # Vite output
         env:
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL_PROD }}
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
