@@ -1,17 +1,55 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Brain, PlayCircle, Settings, TrendingUp } from 'lucide-react';
+import { Brain, PlayCircle, Settings, TrendingUp, Loader2 } from 'lucide-react';
 import { useView } from '@/contexts/ViewContext';
+import { useState } from 'react';
+import { trainModel, TrainRequest } from '@/lib/api';
+
+interface TrainingStatus {
+  isLoading: boolean;
+  message: string | null;
+  error: string | null;
+}
 
 const Training = () => {
   const { viewMode } = useView();
+  const [trainingStates, setTrainingStates] = useState<Record<string, TrainingStatus>>({});
 
-  const models = [
-    { name: 'Random Forest', accuracy: '94.2%', status: 'Entrenado' },
-    { name: 'Neural Network', accuracy: '96.8%', status: 'Entrenado' },
-    { name: 'SVM', accuracy: '92.5%', status: 'Entrenado' },
-    { name: 'XGBoost', accuracy: '95.7%', status: 'Entrenado' },
+  const initialModels = [
+    { name: 'Random Forest', accuracy: '94.2%', status: 'Entrenado', model_type: 'rf' },
+    { name: 'Neural Network', accuracy: '96.8%', status: 'Entrenado', model_type: 'nn' },
+    { name: 'SVM', accuracy: '92.5%', status: 'Entrenado', model_type: 'svm' },
+    { name: 'XGBoost', accuracy: '95.7%', status: 'Entrenado', model_type: 'xgb' },
   ];
+
+  const handleTrainModel = async (modelType: string, modelName: string) => {
+    setTrainingStates(prev => ({
+      ...prev,
+      [modelName]: { isLoading: true, message: null, error: null }
+    }));
+
+    const request: TrainRequest = {
+      model_type: modelType,
+      params: { // Using default params for now, can be configured later
+        "n_estimators": 100,
+        "max_depth": 4,
+        "learning_rate": 0.1
+      }
+    };
+
+    try {
+      const result = await trainModel(request);
+      setTrainingStates(prev => ({
+        ...prev,
+        [modelName]: { isLoading: false, message: result.message, error: null }
+      }));
+    } catch (err) {
+      setTrainingStates(prev => ({
+        ...prev,
+        [modelName]: { isLoading: false, message: null, error: err instanceof Error ? err.message : "An unknown error occurred." }
+      }));
+    }
+  };
 
   return (
     <div className="min-h-screen py-8 px-4">
@@ -34,8 +72,10 @@ const Training = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {models.map((model, index) => (
-            <Card key={index} className="card-cosmic hover:border-primary/50 transition-all">
+          {initialModels.map((model) => {
+            const state = trainingStates[model.name] || { isLoading: false, message: null, error: null };
+            return (
+            <Card key={model.name} className="card-cosmic hover:border-primary/50 transition-all">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>{model.name}</span>
@@ -51,15 +91,21 @@ const Training = () => {
                       <Settings className="w-4 h-4 mr-2" />
                       Configurar
                     </Button>
-                    <Button size="sm">
-                      <PlayCircle className="w-4 h-4 mr-2" />
-                      Re-entrenar
+                    <Button size="sm" onClick={() => handleTrainModel(model.model_type, model.name)} disabled={state.isLoading}>
+                      {state.isLoading ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <PlayCircle className="w-4 h-4 mr-2" />
+                      )}
+                      {state.isLoading ? 'Entrenando...' : 'Re-entrenar'}
                     </Button>
                   </div>
                 </div>
+                {state.error && <p className="text-red-500 mt-4 text-sm">{state.error}</p>}
+                {state.message && <p className="text-green-400 mt-4 text-sm">{state.message}</p>}
               </CardContent>
             </Card>
-          ))}
+          )})}
         </div>
 
         <Card className="card-cosmic">
