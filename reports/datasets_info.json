@@ -1,0 +1,45 @@
+{
+  "timestamp": "2025-10-05T02:07:11.868595",
+  "datasets": {
+    "kepler_koi": {
+      "shape": [
+        9564,
+        141
+      ],
+      "target_column": "koi_disposition",
+      "class_distribution": {
+        "FALSE POSITIVE": 4839,
+        "CONFIRMED": 2746,
+        "CANDIDATE": 1979
+      }
+    },
+    "k2": {
+      "shape": [
+        4004,
+        295
+      ],
+      "target_column": "disposition",
+      "class_distribution": {
+        "CONFIRMED": 2315,
+        "CANDIDATE": 1374,
+        "FALSE POSITIVE": 293,
+        "REFUTED": 22
+      }
+    },
+    "tess_toi": {
+      "shape": [
+        7703,
+        87
+      ],
+      "target_column": "tfopwg_disp",
+      "class_distribution": {
+        "PC": 4679,
+        "FP": 1197,
+        "CP": 684,
+        "KP": 583,
+        "APC": 462,
+        "FA": 98
+      }
+    }
+  }
+}
