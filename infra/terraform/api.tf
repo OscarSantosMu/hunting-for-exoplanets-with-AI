@@ -1,7 +1,7 @@
 resource "azurerm_service_plan" "api" {
   name                = var.api_service_plan_name
-  resource_group_name = azurerm_resource_group.exo.name
-  location            = azurerm_resource_group.exo.location
+  resource_group_name = azurerm_resource_group.cosmo.name
+  location            = azurerm_resource_group.cosmo.location
   os_type             = "Linux"
   sku_name            = var.api_service_plan_sku_name
   tags                = var.tags
@@ -9,8 +9,8 @@ resource "azurerm_service_plan" "api" {
 
 resource "azurerm_linux_web_app" "api" {
   name                = var.api_web_app_name
-  resource_group_name = azurerm_resource_group.exo.name
-  location            = azurerm_resource_group.exo.location
+  resource_group_name = azurerm_resource_group.cosmo.name
+  location            = azurerm_resource_group.cosmo.location
   service_plan_id     = azurerm_service_plan.api.id
   tags                = var.tags
 
@@ -18,11 +18,7 @@ resource "azurerm_linux_web_app" "api" {
     type = "SystemAssigned"
   }
 
-  site_config {
-    linux_fx_version = "DOCKER|${azurerm_container_registry.exo.login_server}/${var.api_container_repository}:${var.api_container_image_tag}"
-    always_on        = true
-    ftps_state       = "Disabled"
-  }
+  site_config {}
 
   # Keep only app settings you actually need for your app
   app_settings = merge({
