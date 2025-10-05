@@ -40,6 +40,24 @@ variable "ml_workspace_name" {
   default     = "exoplanet-ai-mlw"
 }
 
+variable "static_web_app_name" {
+  type        = string
+  description = "Azure Static Web App name"
+  default     = "exoplanet-ai-swa"
+}
+
+variable "static_web_app_sku_tier" {
+  type        = string
+  description = "SKU tier for the Static Web App (Free or Standard)"
+  default     = "Standard"
+}
+
+variable "static_web_app_sku_size" {
+  type        = string
+  description = "SKU size for the Static Web App"
+  default     = "Standard"
+}
+
 variable "tags" {
   type        = map(string)
   description = "Optional tags applied to all resources"

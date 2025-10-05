@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.7.0"
+      version = ">= 3.69.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -116,6 +116,19 @@ resource "azurerm_machine_learning_workspace" "exo" {
   container_registry_id    = azurerm_container_registry.exo.id
   public_network_access_enabled = true
   tags                     = var.tags
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
+resource "azurerm_static_web_app" "exo" {
+  name                = var.static_web_app_name
+  location            = azurerm_resource_group.exo.location
+  resource_group_name = azurerm_resource_group.exo.name
+  sku_tier            = var.static_web_app_sku_tier
+  sku_size            = var.static_web_app_sku_size
+  tags                = var.tags
 
   identity {
     type = "SystemAssigned"

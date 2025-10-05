@@ -25,3 +25,14 @@ output "container_registry_login" {
   }
   sensitive = true
 }
+
+output "static_web_app_host" {
+  description = "Default hostname for the Static Web App"
+  value       = azurerm_static_web_app.exo.default_host_name
+}
+
+output "static_web_app_api_key" {
+  description = "Deployment token for the Static Web App (use to configure GitHub Action secret)"
+  value       = azurerm_static_web_app.exo.api_key
+  sensitive   = true
+}
