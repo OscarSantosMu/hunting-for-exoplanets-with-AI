@@ -50,8 +50,11 @@ Requires Python 3.10+.
 python -m venv .venv
 ./.venv/Scripts/Activate.ps1
 pip install -U pip
-pip install -e .[dev]
+# Full toolchain (training + API + dev tooling)
+pip install -e .[train,api,dev]
 ```
+
+> Need a lighter install? Use `pip install -e .[api]` for the FastAPI service or `pip install -e .[train]` for experimentation jobs.
 
 ### 2. Fetch Sample Data
 ```pwsh

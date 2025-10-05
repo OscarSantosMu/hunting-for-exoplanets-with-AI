@@ -1,2 +1,2 @@
-# Convenience requirements file mirroring pyproject optional deps
--e .[dev]
+# Convenience requirements file for local development (API + training + tooling)
+-e .[api,train,dev]
