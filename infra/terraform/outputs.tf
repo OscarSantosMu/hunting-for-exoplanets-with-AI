@@ -36,16 +36,3 @@ output "static_web_app_api_key" {
   value       = azurerm_static_web_app.exop.api_key
   sensitive   = true
 }
-
-output "api_web_app_hostname" {
-  description = "Default hostname for the FastAPI Azure Web App"
-  value       = azurerm_linux_web_app.api.default_hostname
-}
-
-output "api_web_app_identity" {
-  description = "Principal identifiers for the FastAPI Web App managed identity"
-  value = {
-    principal_id = azurerm_linux_web_app.api.identity[0].principal_id
-    tenant_id    = azurerm_linux_web_app.api.identity[0].tenant_id
-  }
-}
