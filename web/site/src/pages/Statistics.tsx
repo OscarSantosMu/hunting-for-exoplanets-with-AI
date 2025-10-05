@@ -2,8 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart3, TrendingUp, Activity, Target } from 'lucide-react';
 import { useView } from '@/contexts/ViewContext';
-import DataVisualization from '@/components/DataVisualization';
 import { sampleExoplanets } from '@/data/sampleExoplanets';
+import DataVisualization from '@/components/DataVisualization';
+import TSAChart from '@/components/TSAChart';
+import ClusteringCharts from '@/components/ClusteringCharts';
+import PerformanceCharts from '@/components/PerformanceCharts';
 
 const Statistics = () => {
   const { viewMode } = useView();
@@ -56,7 +59,12 @@ const Statistics = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground text-center py-8">
-                  Visualización de señales TOI próximamente...
+                  <TSAChart 
+                  toiId="TOI-700"
+                  planetName="TOI-700d"
+                  period={37.4}
+                  transitDepth={0.003}
+                  />
                 </p>
               </CardContent>
             </Card>
@@ -78,53 +86,15 @@ const Statistics = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground text-center py-8">
-                  Visualización de clustering próximamente...
+                  <ClusteringCharts />
                 </p>
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="performance" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="card-cosmic">
-                <CardHeader>
-                  <div className="flex items-center space-x-2">
-                    <Target className="w-5 h-5 text-primary" />
-                    <CardTitle>AUC-ROC</CardTitle>
-                  </div>
-                  <CardDescription>
-                    {viewMode === 'kids' 
-                      ? 'Qué tan bien la computadora adivina'
-                      : 'Área bajo la curva ROC de los modelos'
-                    }
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground text-center py-8">
-                    Curva AUC-ROC próximamente...
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="card-cosmic">
-                <CardHeader>
-                  <div className="flex items-center space-x-2">
-                    <BarChart3 className="w-5 h-5 text-primary" />
-                    <CardTitle>Métricas de Performance</CardTitle>
-                  </div>
-                  <CardDescription>
-                    {viewMode === 'kids' 
-                      ? 'Calificaciones de los modelos'
-                      : 'Comparativa de precisión, recall y F1-score'
-                    }
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground text-center py-8">
-                    Métricas de performance próximamente...
-                  </p>
-                </CardContent>
-              </Card>
+            <div>
+              <PerformanceCharts />
             </div>
           </TabsContent>
         </Tabs>

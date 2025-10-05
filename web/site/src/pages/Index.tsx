@@ -110,7 +110,7 @@ const Index = () => {
                   <div className="aspect-video bg-accent/10 rounded-lg flex items-center justify-center border border-primary/20">
                     <iframe
                       className="w-full h-full rounded-lg"
-                      src="https://www.youtube.com/embed/FMWW8u_ijW0"
+                      src="https://www.youtube.com/watch?v=cB3aF47Aoxs"
                       title="Exoplanets Explained"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
@@ -188,7 +188,7 @@ const Index = () => {
                   <div className="aspect-video bg-accent/10 rounded-lg flex items-center justify-center border border-primary/20">
                     <iframe
                       className="w-full h-full rounded-lg"
-                      src="https://www.youtube.com/embed/EpZNPjryANw"
+                      src="https://www.youtube.com/watch?v=Twv6bjNbWxk"
                       title="James Webb Space Telescope"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
