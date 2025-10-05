@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Sparkles, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useView } from '@/contexts/ViewContext';
 import { cn } from '@/lib/utils';
 
@@ -51,18 +53,25 @@ const Header = () => {
             ))}
           </nav>
 
-          <div className="flex items-center space-x-2">
-            <Button
-              variant={viewMode === 'kids' ? 'default' : 'outline'}
-              size="sm"
-              onClick={toggleView}
-              className="hidden md:flex items-center space-x-2"
-            >
-              <GraduationCap className="h-4 w-4" />
-              <span>{viewMode === 'kids' ? 'Vista Niños' : 'Vista Especializada'}</span>
-            </Button>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="view-mode-toggle" className="text-sm font-medium text-muted-foreground">
+                <Sparkles className="h-4 w-4 inline-block mr-1" />
+                Niños
+              </Label>
+              <Switch
+                id="view-mode-toggle"
+                checked={viewMode === 'advanced'}
+                onCheckedChange={toggleView}
+                aria-label="Toggle view mode"
+              />
+              <Label htmlFor="view-mode-toggle" className="text-sm font-medium text-muted-foreground">
+                <GraduationCap className="h-4 w-4 inline-block mr-1" />
+                Especializada
+              </Label>
+            </div>
 
-            {/* Mobile menu button */}
+            {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="icon"
