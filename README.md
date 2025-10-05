@@ -16,6 +16,9 @@ Thousands of exoplanets have been discovered via space-based survey missions. Mu
 * Prepare space for advanced preprocessing, feature engineering, model selection & evaluation
 
 ## High-Level Architecture
+![](assets/Infra.png)
+
+## High-Level Project
 ```
 configs/                # data/model/train/evaluate/web knobs
 data/                   # raw/interim/processed storage (lightweight samples)
