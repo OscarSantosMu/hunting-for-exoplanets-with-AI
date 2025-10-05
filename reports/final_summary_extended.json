@@ -1,0 +1,137 @@
+{
+  "project_completion": "2025-10-05T02:31:31.183322",
+  "models_implemented": {
+    "classic_ml": [
+      "Random Forest",
+      "LightGBM",
+      "XGBoost",
+      "AdaBoost"
+    ],
+    "deep_learning": [
+      "stellar",
+      "planetary",
+      "transit",
+      "ensemble"
+    ]
+  },
+  "best_results": {
+    "classic_ml": {
+      "best_model": "LightGBM",
+      "roc_auc": 0.989413616686344,
+      "pr_auc": 0.9893571988806653,
+      "f1": 0.9394418114797262,
+      "recall": 0.9439153439153439,
+      "precision": 0.9350104821802935,
+      "features_used": 30
+    },
+    "deep_learning": {
+      "best_model": "ENSEMBLE",
+      "roc_auc": 0.9770595566050111,
+      "pr_auc": 0.978959153029169,
+      "f1": 0.9017525225703664,
+      "recall": null,
+      "precision": null,
+      "components": 3,
+      "specialized_features": {
+        "stellar": [
+          "koi_fpflag_ss",
+          "koi_prad_log",
+          "koi_fpflag_ec",
+          "koi_smet_err2",
+          "koi_steff_err1",
+          "ror_dor_ratio",
+          "koi_smet_err1",
+          "koi_steff_err2",
+          "koi_num_transits",
+          "koi_smet",
+          "koi_smass_err1",
+          "koi_steff",
+          "koi_slogg_err2"
+        ],
+        "planetary": [
+          "koi_fpflag_co",
+          "rowid",
+          "koi_dikco_msky",
+          "koi_incl",
+          "koi_teq",
+          "koi_teq_log",
+          "koi_tce_plnt_num",
+          "koi_ldm_coeff1"
+        ],
+        "transit": [
+          "koi_score",
+          "koi_count",
+          "koi_dicco_msky",
+          "koi_fwm_stat_sig",
+          "koi_depth",
+          "koi_model_snr",
+          "koi_max_mult_ev",
+          "koi_max_sngle_ev",
+          "koi_bin_oedp_sig"
+        ]
+      }
+    },
+    "comparison": {
+      "classic_advantage_roc": 0.012354060081332885,
+      "classic_advantage_pr": 0.010398045851496285,
+      "classic_advantage_f1": 0.03768928890935974,
+      "dl_interpretability": "Superior",
+      "dl_specialization": "Por dominio de features"
+    }
+  },
+  "datasets_used": [
+    "KOI (Kepler)",
+    "K2",
+    "TOI (TESS)"
+  ],
+  "features_analyzed": {
+    "stellar": [
+      "koi_fpflag_ss",
+      "koi_prad_log",
+      "koi_fpflag_ec",
+      "koi_smet_err2",
+      "koi_steff_err1",
+      "ror_dor_ratio",
+      "koi_smet_err1",
+      "koi_steff_err2",
+      "koi_num_transits",
+      "koi_smet",
+      "koi_smass_err1",
+      "koi_steff",
+      "koi_slogg_err2"
+    ],
+    "planetary": [
+      "koi_fpflag_co",
+      "rowid",
+      "koi_dikco_msky",
+      "koi_incl",
+      "koi_teq",
+      "koi_teq_log",
+      "koi_tce_plnt_num",
+      "koi_ldm_coeff1"
+    ],
+    "transit": [
+      "koi_score",
+      "koi_count",
+      "koi_dicco_msky",
+      "koi_fwm_stat_sig",
+      "koi_depth",
+      "koi_model_snr",
+      "koi_max_mult_ev",
+      "koi_max_sngle_ev",
+      "koi_bin_oedp_sig"
+    ]
+  },
+  "objectives_status": {
+    "recall_target": "NEAR",
+    "sota_comparison": "COMPETITIVE",
+    "exominer_implementation": "SUCCESSFUL",
+    "ensemble_specialization": "IMPLEMENTED"
+  },
+  "recommendations": {
+    "production": "LightGBM",
+    "research": "ExoMiner Ensemble",
+    "scalability": "Deep Learning",
+    "hybrid": "LightGBM + ENSEMBLE"
+  }
+}
