@@ -14,3 +14,12 @@ resource "azurerm_machine_learning_workspace" "cosmo" {
     type = "SystemAssigned"
   }
 }
+
+# KV RBAC: let AML read secrets
+resource "azurerm_role_assignment" "kv_secrets_user_ml" {
+  scope                = azurerm_key_vault.cosmo.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_machine_learning_workspace.cosmo.identity[0].principal_id
+
+  depends_on = [azurerm_machine_learning_workspace.cosmo]
+}
