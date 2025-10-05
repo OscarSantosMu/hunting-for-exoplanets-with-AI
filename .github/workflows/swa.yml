@@ -42,3 +42,4 @@ jobs:
           output_location: "dist"      # Vite output
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_API_BASE_URL2: ${{ secrets.VITE_API_BASE_URL2 }}
