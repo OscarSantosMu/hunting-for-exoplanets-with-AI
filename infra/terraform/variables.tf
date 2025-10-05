@@ -58,6 +58,42 @@ variable "static_web_app_sku_size" {
   default     = "Standard"
 }
 
+variable "api_service_plan_name" {
+  type        = string
+  description = "App Service plan name for the FastAPI deployment"
+  default     = "exoplanet-ai-api-plan"
+}
+
+variable "api_service_plan_sku_name" {
+  type        = string
+  description = "SKU name for the App Service plan (e.g. B1, P1v2)"
+  default     = "F1"
+}
+
+variable "api_web_app_name" {
+  type        = string
+  description = "Azure Web App name hosting the FastAPI service"
+  default     = "exoplanet-ai-api"
+}
+
+variable "api_container_repository" {
+  type        = string
+  description = "Container repository name inside ACR for the FastAPI image"
+  default     = "fastapi"
+}
+
+variable "api_container_image_tag" {
+  type        = string
+  description = "Container image tag for the FastAPI deployment"
+  default     = "latest"
+}
+
+variable "api_app_settings" {
+  type        = map(string)
+  description = "Additional application settings for the FastAPI Web App"
+  default     = {}
+}
+
 variable "tags" {
   type        = map(string)
   description = "Optional tags applied to all resources"
