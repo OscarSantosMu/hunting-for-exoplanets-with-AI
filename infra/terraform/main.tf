@@ -4,10 +4,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = ">= 3.69.0"
     }
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = ">= 2.49.0"
-    }
     random = {
       source  = "hashicorp/random"
       version = "~>3.0"
@@ -35,28 +31,10 @@ provider "azurerm" {
   use_oidc = true
 }
 
-provider "azuread" {}
-
-data "azuread_user" "guest_user" {
-  user_principal_name = "alexiscarrillo.medina_gmail.com#EXT#@oscarsantosmuoutlook.onmicrosoft.com"
-}
-
 resource "azurerm_resource_group" "exo" {
   name     = var.resource_group_name
   location = var.location
   tags     = var.tags
-}
-
-resource "azurerm_role_assignment" "guest_rg_contributor" {
-  scope                = azurerm_resource_group.exo.id
-  role_definition_name = "Owner"
-  principal_id         = data.azuread_user.guest_user.object_id
-}
-
-resource "azurerm_role_assignment" "service_principal_uaar" {
-  scope                = azurerm_resource_group.exo.id
-  role_definition_name = "User Access Administrator"
-  principal_id         = data.azurerm_client_config.current.object_id
 }
 
 resource "azurerm_container_registry" "exo" {
@@ -68,12 +46,6 @@ resource "azurerm_container_registry" "exo" {
   tags                = var.tags
 }
 
-resource "azurerm_role_assignment" "guest_acr_pull" {
-  scope                = azurerm_container_registry.exo.id
-  role_definition_name = "AcrPull"
-  principal_id         = data.azuread_user.guest_user.object_id
-}
-
 resource "azurerm_storage_account" "exo" {
   name                     = var.storage_account_name
   resource_group_name      = azurerm_resource_group.exo.name
@@ -82,12 +54,6 @@ resource "azurerm_storage_account" "exo" {
   account_replication_type = "LRS"
   min_tls_version          = "TLS1_2"
   tags                     = var.tags
-}
-
-resource "azurerm_role_assignment" "guest_storage_reader" {
-  scope                = azurerm_storage_account.exo.id
-  role_definition_name = "Storage Blob Data Reader"
-  principal_id         = data.azuread_user.guest_user.object_id
 }
 
 resource "azurerm_application_insights" "exo" {
@@ -138,33 +104,14 @@ resource "azurerm_key_vault" "exo" {
     ]
   }
 
+  # NEW: AML Workspace Managed Identity
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azuread_user.guest_user.object_id
+    object_id = azurerm_machine_learning_workspace.exo.identity[0].principal_id
 
-    key_permissions = [
-      "Get",
-      "List",
-      "Create",
-      "Update",
-      "Import",
-      "Delete",
-      "Purge",
-      "Recover",
-      "Backup",
-      "Restore"
-    ]
-
-    secret_permissions = [
-      "Get",
-      "List",
-      "Set",
-      "Delete",
-      "Purge",
-      "Recover",
-      "Backup",
-      "Restore"
-    ]
+    # Usually read-only is enough; give set/delete only if you need jobs to write secrets
+    key_permissions    = ["Get","List"]
+    secret_permissions = ["Get","List"]
   }
 }
 
@@ -183,6 +130,13 @@ resource "azurerm_machine_learning_workspace" "exo" {
   identity {
     type = "SystemAssigned"
   }
+}
+
+# --- Storage: Blob Data Contributor for AML Workspace MI ---
+resource "azurerm_role_assignment" "aml_mi_storage_blob_contrib" {
+  scope                = azurerm_storage_account.exo.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_machine_learning_workspace.exo.identity[0].principal_id
 }
 
 resource "azurerm_static_web_app" "exo" {
