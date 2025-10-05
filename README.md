@@ -10,10 +10,17 @@ AI/ML pipeline & web interface for the 2025 NASA Space Apps Challenge – automa
 Thousands of exoplanets have been discovered via space-based survey missions. Much of the classification work has historically been manual. This repository provides a reproducible scaffold to:
 
 * Ingest (sample) public NASA Exoplanet Archive data
-* Train baseline ML models (Random Forest, optional LightGBM / XGBoost)
+* Train baseline ML models (optional LightGBM / CatBoost, Ensamble) and a DL Ensamble, a replica of [ExoMiner](https://arxiv.org/pdf/2111.10009)
 * Serve predictions via a FastAPI service
 * Offer a modern React SPA (Vite + Tailwind + shadcn-ui) for exploration, with legacy Streamlit/Gradio prototypes for rapid experimentation
 * Prepare space for advanced preprocessing, feature engineering, model selection & evaluation
+
+## Data flow architecture
+
+<img src="data/Diagrama%20de%20Flujo%20-%20Datos.png" alt="Data Flow" height="500">
+
+*This modular pipeline ingests exoplanet data, preprocesses and engineers features, trains and evaluates ML models, and serves predictions via a FastAPI backend. The architecture supports both a React SPA and legacy UIs, with infrastructure managed by Docker and Terraform for scalable Azure deployment.  
+Repository organization enables easy extension for advanced ML and cloud automation.*
 
 ## High-Level Architecture
 ![](assets/Infra.png)
