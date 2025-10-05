@@ -1,123 +1,151 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UploadCloud, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { useDropzone } from 'react-dropzone';
+import { uploadFile, predictBatch, BatchPredictResponse } from '@/lib/api';
 
 const UploadSection = () => {
   const [file, setFile] = useState<File | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const { toast } = useToast();
+  const [modelType, setModelType] = useState('xgb');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<BatchPredictResponse | null>(null);
+  const [uploadPath, setUploadPath] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      if (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv')) {
-        setFile(selectedFile);
-        toast({
-          title: "Archivo cargado",
-          description: `${selectedFile.name} listo para procesar`,
-        });
-      } else {
-        toast({
-          title: "Formato no válido",
-          description: "Por favor, carga un archivo CSV",
-          variant: "destructive",
-        });
-      }
+  const onDrop = (acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      setFile(acceptedFiles[0]);
     }
   };
 
-  const handleProcess = () => {
-    if (!file) return;
-    
-    setIsProcessing(true);
-    
-    // Simulación de procesamiento
-    setTimeout(() => {
-      setIsProcessing(false);
-      toast({
-        title: "Análisis completado",
-        description: "El dataset ha sido procesado. Funcionalidad de ML próximamente.",
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { 'text/csv': ['.csv'] },
+    multiple: false,
+  });
+
+  const handleProcess = async () => {
+    if (!file) {
+      setError('Por favor, selecciona un archivo primero.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setResult(null);
+    setUploadPath(null);
+
+    try {
+      // Paso 1: Subir el archivo
+      const uploadResponse = await uploadFile(file);
+      setUploadPath(uploadResponse.blob_path);
+
+      // Paso 2: Iniciar predicción por lotes
+      const predictResponse = await predictBatch({
+        csv_blob_path: uploadResponse.blob_path,
+        model_type: modelType,
       });
-    }, 2000);
+      setResult(predictResponse);
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ocurrió un error desconocido.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <section className="py-16 px-4 gradient-nebula">
-      <div className="container mx-auto max-w-4xl">
-        <div className="text-center mb-12 animate-fade-in">
-          <h2 className="mb-4 glow-text">Carga de Dataset</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Sube tu propio dataset de exoplanetas para análisis con ML
-          </p>
+    <Card className="card-cosmic w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle className="glow-text">Procesar Dataset</CardTitle>
+        <CardDescription>Sube un archivo CSV y selecciona un modelo para procesarlo.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div
+          {...getRootProps()}
+          className={`p-8 border-2 border-dashed rounded-lg text-center cursor-pointer transition-colors
+            ${isDragActive ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'}`}
+        >
+          <input {...getInputProps()} />
+          <UploadCloud className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+          {file ? (
+            <p className="text-foreground">{file.name}</p>
+          ) : (
+            <p className="text-muted-foreground">
+              {isDragActive ? 'Suelta el archivo aquí...' : 'Arrastra y suelta un archivo CSV, o haz clic para seleccionar'}
+            </p>
+          )}
         </div>
 
-        <Card className="card-cosmic">
-          <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <FileSpreadsheet className="w-6 h-6 text-primary" />
-              Cargar Archivo CSV
-            </CardTitle>
-            <CardDescription>
-              Formato esperado: Incluye columnas como 'disposition', 'name', 'distance', 'radius', etc.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleFileChange}
-                className="hidden"
-                id="file-upload"
-              />
-              <label htmlFor="file-upload" className="cursor-pointer">
-                <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-lg mb-2">
-                  {file ? file.name : "Haz clic para seleccionar un archivo CSV"}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  o arrastra y suelta aquí
-                </p>
-              </label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="model-select" className="text-sm font-medium mb-2 block">Modelo</label>
+            <Select value={modelType} onValueChange={setModelType}>
+              <SelectTrigger id="model-select">
+                <SelectValue placeholder="Selecciona un modelo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="xgb">XGBoost</SelectItem>
+                <SelectItem value="lgbm">LightGBM</SelectItem>
+                <SelectItem value="catboost">CatBoost</SelectItem>
+                <SelectItem value="nn">Red Neuronal</SelectItem>
+                <SelectItem value="ensemble">Ensamble</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <Button onClick={handleProcess} disabled={isLoading || !file} className="w-full">
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Procesando...
+            </>
+          ) : (
+            'Procesar Dataset'
+          )}
+        </Button>
+
+        {error && (
+          <div className="flex items-center p-4 bg-destructive/10 text-destructive rounded-lg">
+            <AlertCircle className="w-5 h-5 mr-3" />
+            <div>
+              <h4 className="font-semibold">Error</h4>
+              <p className="text-sm">{error}</p>
             </div>
+          </div>
+        )}
 
-            {file && (
-              <div className="flex items-center gap-2 p-4 bg-primary/10 border border-primary/30 rounded-lg">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
-                <div className="flex-1">
-                  <p className="font-medium">{file.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {(file.size / 1024).toFixed(2)} KB
-                  </p>
-                </div>
-              </div>
-            )}
+        {uploadPath && !result && (
+           <div className="flex items-center p-4 bg-info/10 text-info-foreground rounded-lg">
+             <CheckCircle className="w-5 h-5 mr-3" />
+             <div>
+               <h4 className="font-semibold">Paso 1/2 Completo</h4>
+               <p className="text-sm">Archivo subido a: <code className="font-mono">{uploadPath}</code>. Ahora iniciando predicción...</p>
+             </div>
+           </div>
+        )}
 
-            <div className="bg-accent/10 border border-accent/30 rounded-lg p-4 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium mb-1">Próximamente: Análisis con ML</p>
-                <p className="text-muted-foreground">
-                  La validación automática con modelos de Machine Learning estará disponible próximamente. 
-                  El sistema identificará exoplanetas, analizará similitudes y explicará clasificaciones.
-                </p>
-              </div>
+        {result && (
+          <div className="flex items-center p-4 bg-success/10 text-success-foreground rounded-lg">
+            <CheckCircle className="w-5 h-5 mr-3" />
+            <div>
+              <h4 className="font-semibold">Proceso Completo</h4>
+              <p className="text-sm">{result.results.length} registros procesados exitosamente.</p>
+              {/* Opcionalmente, mostrar un fragmento de los resultados */}
+              <details className="mt-2 text-xs">
+                <summary>Ver resultados (JSON)</summary>
+                <pre className="mt-2 p-2 bg-background/50 rounded max-h-40 overflow-auto">
+                  <code>{JSON.stringify(result, null, 2)}</code>
+                </pre>
+              </details>
             </div>
-
-            <Button
-              onClick={handleProcess}
-              disabled={!file || isProcessing}
-              className="w-full bg-primary hover:bg-primary/90"
-              size="lg"
-            >
-              {isProcessing ? "Procesando..." : "Procesar Dataset"}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </section>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
