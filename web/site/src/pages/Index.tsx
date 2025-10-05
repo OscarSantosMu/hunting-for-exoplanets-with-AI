@@ -75,7 +75,7 @@ const Index = () => {
           <CardContent>
             <Button onClick={handlePredict} disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? "Loading..." : "Predict for: KIC 8193315"}
+              {isLoading ? "Loading..." : "Predict for KIC 8193315"}
             </Button>
             {predictionError && <p className="text-red-500 mt-4">Error: {predictionError}</p>}
             {prediction && (
