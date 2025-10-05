@@ -53,9 +53,10 @@ jobs:
       - name: Build & push image to ACR (using ACR Tasks)
         # ACR builds on Azure infra; no docker login required on runner
         run: |
-          az acr build \
+            az acr build \
             --registry "$ACR_NAME" \
             --image "$IMAGE_NAME:$IMAGE_TAG" \
+            --file infra/docker/Dockerfile.api \
             .
 
       - name: Ensure Container Apps environment exists
