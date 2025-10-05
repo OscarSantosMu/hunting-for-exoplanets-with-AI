@@ -53,6 +53,12 @@ resource "azurerm_role_assignment" "guest_rg_contributor" {
   principal_id         = data.azuread_user.guest_user.object_id
 }
 
+resource "azurerm_role_assignment" "service_principal_uaar" {
+  scope                = azurerm_resource_group.exo.id
+  role_definition_name = "User Access Administrator"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
 resource "azurerm_container_registry" "exo" {
   name                = var.acr_name
   resource_group_name = azurerm_resource_group.exo.name
@@ -181,7 +187,7 @@ resource "azurerm_machine_learning_workspace" "exo" {
 
 resource "azurerm_static_web_app" "exo" {
   name                = var.static_web_app_name
-  location            = azurerm_resource_group.exo.location
+  location            = "${azurerm_resource_group.exo.location}2"
   resource_group_name = azurerm_resource_group.exo.name
   sku_tier            = var.static_web_app_sku_tier
   sku_size            = var.static_web_app_sku_size
