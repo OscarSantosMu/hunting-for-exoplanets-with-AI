@@ -49,7 +49,7 @@ resource "azurerm_resource_group" "exo" {
 
 resource "azurerm_role_assignment" "guest_rg_contributor" {
   scope                = azurerm_resource_group.exo.id
-  role_definition_name = "Contributor"
+  role_definition_name = "Owner"
   principal_id         = data.azuread_user.guest_user.object_id
 }
 
