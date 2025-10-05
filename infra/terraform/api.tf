@@ -17,12 +17,8 @@ resource "azurerm_linux_web_app" "api" {
   identity {
     type = "SystemAssigned"
   }
-
-  site_config {
-    linux_fx_version = "DOCKER|${azurerm_container_registry.exo.login_server}/${var.api_container_repository}:${var.api_container_image_tag}"
-    always_on        = true
-    ftps_state       = "Disabled"
-  }
+  
+  site_config {}
 
   # Keep only app settings you actually need for your app
   app_settings = merge({
