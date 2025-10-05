@@ -19,10 +19,10 @@ env:
   AZURE_TENANT_ID:       ${{ secrets.AZURE_TENANT_ID }}
   AZURE_CLIENT_ID:       ${{ secrets.AZURE_CLIENT_ID }}
   RESOURCE_GROUP:        exop-ai-rg
-  CONTAINERAPPS_ENV:     exoplanet-ai-ca-env
-  CONTAINERAPP_NAME:     exoplanet-ai-api
-  ACR_NAME:              exoplanetaiacr
-  IMAGE_NAME:            exoplanet-ai-api
+  CONTAINERAPPS_ENV:     exop-ai-cae
+  CONTAINERAPP_NAME:     exop-ai-api
+  ACR_NAME:              exopacr
+  IMAGE_NAME:            exop-ai-api
   IMAGE_TAG:             ${{ github.sha }}
   LOCATION:              eastus
   PORT:                  "8000"
