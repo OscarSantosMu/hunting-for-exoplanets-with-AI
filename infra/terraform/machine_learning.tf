@@ -1,25 +1,16 @@
-resource "azurerm_machine_learning_workspace" "cosmo" {
-  name                          = var.ml_workspace_name
-  location                      = azurerm_resource_group.cosmo.location
-  resource_group_name           = azurerm_resource_group.cosmo.name
-  friendly_name                 = "${var.project_name} workspace"
-  application_insights_id       = azurerm_application_insights.cosmo.id
-  key_vault_id                  = azurerm_key_vault.cosmo.id
-  storage_account_id            = azurerm_storage_account.cosmo.id
-  container_registry_id         = azurerm_container_registry.cosmo.id
+resource "azurerm_machine_learning_workspace" "exop" {
+  name                     = var.ml_workspace_name
+  location                 = azurerm_resource_group.exop.location
+  resource_group_name      = azurerm_resource_group.exop.name
+  friendly_name            = "${var.project_name} workspace"
+  application_insights_id  = azurerm_application_insights.exop.id
+  key_vault_id             = azurerm_key_vault.exop.id
+  storage_account_id       = azurerm_storage_account.exop.id
+  container_registry_id    = azurerm_container_registry.exop.id
   public_network_access_enabled = true
-  tags                          = var.tags
+  tags                     = var.tags
 
   identity {
     type = "SystemAssigned"
   }
-}
-
-# KV RBAC: let AML read secrets
-resource "azurerm_role_assignment" "kv_secrets_user_ml" {
-  scope                = azurerm_key_vault.cosmo.id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = azurerm_machine_learning_workspace.cosmo.identity[0].principal_id
-
-  depends_on = [azurerm_machine_learning_workspace.cosmo]
 }

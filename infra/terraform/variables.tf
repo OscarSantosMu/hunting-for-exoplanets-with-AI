@@ -1,7 +1,7 @@
 variable "project_name" {
   type        = string
   description = "Base name prefix for Azure resources"
-  default     = "cosmo-ai"
+  default     = "exop-ai"
 }
 
 variable "location" {
@@ -13,37 +13,37 @@ variable "location" {
 variable "resource_group_name" {
   type        = string
   description = "Name of the resource group"
-  default     = "cosmo-ai-rg"
+  default     = "exop-ai-rg"
 }
 
 variable "acr_name" {
   type        = string
   description = "Azure Container Registry name"
-  default     = "cosmoacr"
+  default     = "exopacr"
 }
 
 variable "storage_account_name" {
   type        = string
   description = "Globally unique storage account name (lowercase, 3-24 characters)"
-  default     = "cosmoaisastrg"
+  default     = "exopaisastrg"
 }
 
 variable "key_vault_name" {
   type        = string
   description = "Azure Key Vault name (3-24 characters, letters/digits/hyphen)"
-  default     = "cosmo-ai-kv"
+  default     = "exop-ai-kv"
 }
 
 variable "ml_workspace_name" {
   type        = string
   description = "Azure Machine Learning workspace name"
-  default     = "cosmo-ai-mlw"
+  default     = "exop-ai-mlw"
 }
 
 variable "static_web_app_name" {
   type        = string
   description = "Azure Static Web App name"
-  default     = "cosmo-ai-swa"
+  default     = "exop-ai-swa"
 }
 
 variable "static_web_app_sku_tier" {
@@ -61,19 +61,19 @@ variable "static_web_app_sku_size" {
 variable "api_service_plan_name" {
   type        = string
   description = "App Service plan name for the FastAPI deployment"
-  default     = "cosmo-ai-api-plan"
+  default     = "exop-ai-api-plan"
 }
 
 variable "api_service_plan_sku_name" {
   type        = string
   description = "SKU name for the App Service plan (e.g. B1, P1v2)"
-  default     = "B1"
+  default     = "S1"
 }
 
 variable "api_web_app_name" {
   type        = string
   description = "Azure Web App name hosting the FastAPI service"
-  default     = "cosmo-ai-api"
+  default     = "exop-ai-api"
 }
 
 variable "api_container_repository" {
