@@ -9,60 +9,97 @@ on:
       - "web/api/**"
       - "src/exoplanet_ai/api/**"
 
-env:
-  ACR_NAME: exoplanetacr                  # Registry name (not FQDN)
-  ACR_LOGIN_SERVER: exoplanetacr.azurecr.io
-  IMAGE_REPOSITORY: fastapi
-  IMAGE_TAG: latest
-  DOCKERFILE_PATH: infra/docker/Dockerfile.api
-
 permissions:
+  id-token: write   # for OIDC login to Azure
   contents: read
-  id-token: write
 
-concurrency:
-  group: acr-build-api-${{ github.ref }}
-  cancel-in-progress: true
+env:
+  # Customize these or move to repo "Variables" if you like
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  AZURE_TENANT_ID:       ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CLIENT_ID:       ${{ secrets.AZURE_CLIENT_ID }}
+  RESOURCE_GROUP:        exop-ai-rg
+  CONTAINERAPPS_ENV:     exoplanet-ai-ca-env
+  CONTAINERAPP_NAME:     exoplanet-ai-api
+  ACR_NAME:              exoplanetaiacr
+  IMAGE_NAME:            exoplanet-ai-api
+  IMAGE_TAG:             ${{ github.sha }}
+  LOCATION:              eastus
+  PORT:                  "8000"
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Authenticate to Azure
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Build and push FastAPI image with ACR Tasks
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            set -euo pipefail
+      - name: Ensure Azure Container Registry exists
+        shell: bash
+        run: |
+          if ! az acr show -n "$ACR_NAME" -g "$RESOURCE_GROUP" &>/dev/null; then
+            az acr create -n "$ACR_NAME" -g "$RESOURCE_GROUP" --sku Basic -l "$LOCATION"
+          fi
+          echo "ACR_LOGIN_SERVER=$(az acr show -n "$ACR_NAME" -g "$RESOURCE_GROUP" --query loginServer -o tsv)" >> $GITHUB_ENV
 
-            if [ -z "${ACR_NAME:-}" ]; then
-              echo "ACR_NAME environment variable must be set (Azure Container Registry name)." >&2
-              exit 1
-            fi
+      - name: Build & push image to ACR (using ACR Tasks)
+        # ACR builds on Azure infra; no docker login required on runner
+        run: |
+          az acr build \
+            --registry "$ACR_NAME" \
+            --image "$IMAGE_NAME:$IMAGE_TAG" \
+            .
 
-            IMAGE_REPO="${IMAGE_REPOSITORY:-fastapi}"
-            LATEST_TAG="${IMAGE_TAG:-latest}"
-            DOCKERFILE="${DOCKERFILE_PATH:-infra/docker/Dockerfile.api}"
-            SHORT_SHA="${GITHUB_SHA::7}"
+      - name: Ensure Container Apps environment exists
+        run: |
+          az extension add -n containerapp --upgrade
+          if ! az containerapp env show -g "$RESOURCE_GROUP" -n "$CONTAINERAPPS_ENV" &>/dev/null; then
+            az containerapp env create -g "$RESOURCE_GROUP" -n "$CONTAINERAPPS_ENV" -l "$LOCATION"
+          fi
 
-            echo "Building ${IMAGE_REPO}:{${LATEST_TAG},${SHORT_SHA}} in ${ACR_NAME} using ${DOCKERFILE}"
+      - name: Create or update Container App (with external ingress)
+        id: upsert
+        run: |
+          IMAGE="${ACR_LOGIN_SERVER}/${IMAGE_NAME}:${IMAGE_TAG}"
 
-            # You can add --platform linux/amd64 if needed by your runtime
-            az acr build \
-              --registry "$ACR_NAME" \
-              --file "$DOCKERFILE" \
-              --image "${IMAGE_REPO}:${LATEST_TAG}" \
-              --image "${IMAGE_REPO}:${SHORT_SHA}" \
-              . 
+          # Create if not exists
+          if ! az containerapp show -g "$RESOURCE_GROUP" -n "$CONTAINERAPP_NAME" &>/dev/null; then
+            az containerapp create \
+              -g "$RESOURCE_GROUP" -n "$CONTAINERAPP_NAME" \
+              --environment "$CONTAINERAPPS_ENV" \
+              --image "$IMAGE" \
+              --ingress external --target-port "$PORT" \
+              --min-replicas 1 --max-replicas 2 \
+              --registry-server "$ACR_LOGIN_SERVER" \
+              --query properties.configuration.ingress.fqdn -o tsv
+          else
+            az containerapp update \
+              -g "$RESOURCE_GROUP" -n "$CONTAINERAPP_NAME" \
+              --image "$IMAGE" \
+              --set-env-vars "PORT=$PORT" \
+              --ingress external --target-port "$PORT" \
+              --min-replicas 1 --max-replicas 2 \
+              --registry-server "$ACR_LOGIN_SERVER" \
+              --query properties.configuration.ingress.fqdn -o tsv
+          fi
 
-            echo "### Image pushed" >> "$GITHUB_STEP_SUMMARY"
-            echo "- ${ACR_LOGIN_SERVER}/${IMAGE_REPO}:${LATEST_TAG}" >> "$GITHUB_STEP_SUMMARY"
-            echo "- ${ACR_LOGIN_SERVER}/${IMAGE_REPO}:${SHORT_SHA}" >> "$GITHUB_STEP_SUMMARY"
+      - name: Grant ACR pull to Container App's managed identity (idempotent)
+        # Needed once; safe to run each deploy
+        run: |
+          PRINCIPAL_ID=$(az containerapp show -g "$RESOURCE_GROUP" -n "$CONTAINERAPP_NAME" --query identity.principalId -o tsv)
+          ACR_ID=$(az acr show -n "$ACR_NAME" -g "$RESOURCE_GROUP" --query id -o tsv)
+          # Assign 'AcrPull' so the Container App can pull from the private ACR
+          az role assignment create --assignee "$PRINCIPAL_ID" --role "AcrPull" --scope "$ACR_ID" 2>/dev/null || true
+
+      - name: Output public URL
+        run: |
+          FQDN=$(az containerapp show -g "$RESOURCE_GROUP" -n "$CONTAINERAPP_NAME" --query properties.configuration.ingress.fqdn -o tsv)
+          echo "Your app is available at: https://${FQDN}"
