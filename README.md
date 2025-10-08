@@ -18,7 +18,10 @@ Thousands of exoplanets have been discovered via space-based survey missions. Mu
 * Prepare space for advanced preprocessing, feature engineering, model selection & evaluation
 
 ## Demo
-[![Demo video screenshot](assets/web%20page.png)](https://youtu.be/WUcHRQ6usZc)
+<a href="https://www.youtube.com/watch?v=WUcHRQ6usZc"
+   target="_blank" rel="noopener">
+  <img src="assets/web%20page.png" alt="Demo" />
+</a>
 
 ## Data flow architecture
 
