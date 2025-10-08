@@ -28,7 +28,11 @@ Thousands of exoplanets have been discovered via space-based survey missions. Mu
 Repository organization enables easy extension for advanced ML and cloud automation.*
 
 ## High-Level Architecture
-![](assets/Infra.png)
+<a href="https://www.youtube.com/watch?v=YOUR_ID"
+   target="_blank" rel="noopener">
+  <img src="assets/Infra.png" alt="High-Level Architecture" />
+</a>
+
 
 ## Tech Stack Snapshot
 - **Backend**: FastAPI, scikit-learn baselines, LightGBM/XGBoost/CatBoost/Neural Network.
